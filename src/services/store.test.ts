@@ -15,7 +15,7 @@ jest.mock('../utils/cookie', () => ({
   deleteCookie: jest.fn()
 }));
 
-import store from './store';
+import store, { rootReducer } from './store'; // импортируем rootReducer
 import constructorReducer from './slices/constructorSlice/constructorSlice';
 import ingredientsReducer from './slices/ingredientsSlice/ingredientsSlice';
 import orderReducer from './slices/orderSlice/orderSlice';
@@ -39,5 +39,21 @@ describe('rootReducer', () => {
       profileOrdersReducer(undefined, { type: '' })
     );
     expect(state.user).toEqual(userReducer(undefined, { type: '' }));
+  });
+
+  // Добавляем проверку, которую требует ревьюер 
+  it('не должен мутировать состояние при неизвестном экшене', () => {
+    // Получаем начальное состояние через rootReducer
+    const initialState = rootReducer(undefined, { type: '@@INIT' });
+    
+    // Диспатчим неизвестный экшен
+    const unknownAction = { type: 'UNKNOWN_ACTION' };
+    const newState = rootReducer(initialState, unknownAction);
+
+    // Проверяем, что состояние не изменилось
+    expect(newState).toEqual(initialState);
+    
+    // Проверяем иммутабельность (это должен быть новый объект)
+    expect(newState).not.toBe(initialState);
   });
 });
